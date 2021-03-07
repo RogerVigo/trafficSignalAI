@@ -1,6 +1,13 @@
-from trafficSigns.data import datasets_preparing as dataset
+from data import datasets_preparing as dataset
+import pickle
+import cv2 as cv
+
 
 label_names_file = "data/label_names.csv"
 
-dataset.label_text(label_names_file)
-print(dataset.load_rgb_data("data/data1.pickle"))
+for i in range(9):
+    with open("data/data" + str(i) + ".pickle", "rb") as f:
+        d = pickle.load(f, encoding='latin1')  # dictionary type, we use 'latin1' for python3
+
+        for k, v in d:
+            print(k)
