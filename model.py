@@ -103,15 +103,46 @@ class ProductionModel(TrainingModel):
         if not self.model:
             raise Exception("ModelNotLoaded")
 
+    def show_image(self, image):
+        cv.imshow("image", image)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+
 
     def run(self):
-        image = cv.imread("/home/roger/Imágenes/signals/carretera.png", cv.IMREAD_COLOR)
-        reshaped = np.reshape(image,(1502,744,3))
-        #image = image / 255
-        image_shape = np.shape(reshaped)
-        print(image_shape)
 
-        print(image[0][0])
-        for i in image_shape:
-            #print(i)
-            pass
+        image = cv.imread("/home/roger/Imágenes/signals/carretera.png", cv.IMREAD_COLOR)/255
+        shape = np.shape(image)
+        final_image = []
+        kernel = 32
+        x = 0
+        y = 0
+        print(shape)
+        while True:
+            b = False
+            for i in range(x, x + kernel):
+                if y + kernel < shape[1]:
+                    final_image.append(image[i][y:kernel + y])
+                else:
+                    b = True
+            if b:
+                print("a")
+                x = x + kernel // 2
+                y = 0
+                if x + kernel > shape[0]:
+                    print(x + kernel)
+                    print(shape)
+                    break
+
+                continue
+            final_image = np.array(final_image)
+            #self.show_image(final_image * 255)
+            print(np.shape(final_image))
+            prediction = self.model.predict(final_image) # -> Error predicting image. Expects 4 dim and giving just 3 dim
+            print(prediction)
+            break
+
+            final_image = []
+            y = y + kernel // 2
+
+        cv.destroyAllWindows()
