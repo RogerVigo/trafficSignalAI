@@ -9,6 +9,21 @@ def show_image(image):
     cv.waitKey(50)
     #cv.destroyAllWindows()
 
+x =[
+    [
+        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
+        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
+        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
+    ],
+    [
+        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
+        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
+        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
+    ]
+]
+print(np.shape(x))
+exit()
+
 image = cv.imread("/home/roger/Imágenes/signals/carretera.png", cv.IMREAD_COLOR)
 shape = np.shape(image)
 final_image = []

@@ -1,5 +1,6 @@
 import sys
 from model import TrainingModel, ProductionModel
+import time as t
 
 if __name__ == "__main__":
     if 1 < len(sys.argv) > 1: #Estamos recibiendo parametros por cli
@@ -12,8 +13,11 @@ if __name__ == "__main__":
 
     elif len(sys.argv) == 1:
         try:
+            t_start = t.time()
             model = ProductionModel()
+            model.run()
+            t_end = t.time()
+
+            print(f"Total time {t_end - t_start}")
         except (Exception):
             print("Error ocurred,", sys.exc_info())
-
-        model.run()
