@@ -100,6 +100,10 @@ class ProductionModel(TrainingModel):
     def __init__(self):
         super(ProductionModel, self).__init__()
         self.model = self.loadModel(compile=False)
+        self.threshold = 0.5
+        self.biggest = 0
+        self.biggest_x = 0
+        self.biggest_y = 0
         if not self.model:
             raise Exception("ModelNotLoaded")
 
@@ -109,37 +113,47 @@ class ProductionModel(TrainingModel):
         cv.destroyAllWindows()
 
 
+    def checkResult(self, data):
+        result = 0
+        for element in data[0]:
+            if element > self.biggest:
+                self.biggest = element
+                result = 2
+
+            if element >= self.threshold:
+                print("EUREKA!")
+                result = 1
+
+        return result
+
+
     def run(self):
 
         image = cv.imread("/home/roger/Imágenes/signals/carretera.png", cv.IMREAD_COLOR)/255
         shape = np.shape(image)
-        final_image = []
         kernel = 32
         x = 0
         y = 0
-        final_images = []
         while True:
-            stop = False
+            if x+kernel <= shape[0]:
+                while y+kernel <= shape[1]:
+                    crop = image[x:x+kernel, y:y+kernel, :]
+                    final = np.array([crop])
+                    result = self.model.predict(final)
+                    if self.checkResult(result) == 2:
+                        self.biggest_x = x
+                        self.biggest_y = y
+                    y += kernel // 2
 
-            for i in range(x, x + kernel):
-                if y + kernel < shape[1]:
-                    final_image.append(image[i][y:kernel + y])
-                else:
-                    stop = True
+                x+= kernel // 2
+            else:
+                break
 
-            if stop:
-                x = x + kernel // 2
-                y = 0
-                if x + kernel > shape[0]:
-                    break
-                continue
+        print(self.biggest)
+        print(self.biggest_x)
+        print(self.biggest_y)
+        #print(np.shape(final_images))
+        final_image = []
+        y = y + kernel // 2
 
-            #self.show_image(np.array(final_image * 255))
-            final_images.append(final_image)
-            #print(np.shape(final_images))
-            final_image = []
-            y = y + kernel // 2
-
-        print(np.shape(final_images))
-        prediction = self.model.predict(final_images)
         cv.destroyAllWindows()

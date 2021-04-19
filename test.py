@@ -3,26 +3,12 @@ import numpy as np
 from time import time, time_ns
 import os
 import cv2 as cv
+import numpy as np
 
 def show_image(image):
     cv.imshow("image", image)
-    cv.waitKey(50)
+    cv.waitKey(0)
     #cv.destroyAllWindows()
-
-x =[
-    [
-        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
-        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
-        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
-    ],
-    [
-        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
-        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]],
-        [[1,2,3],[1,2,3],[1,2,3],[1,2,3],[1,2,3]]
-    ]
-]
-print(np.shape(x))
-exit()
 
 image = cv.imread("/home/roger/Imágenes/signals/carretera.png", cv.IMREAD_COLOR)
 shape = np.shape(image)
@@ -30,7 +16,10 @@ final_image = []
 kernel = 100
 x = 0
 y = 0
-print(shape)
+
+show_image(image[x:kernel, y:kernel, :])
+
+exit()
 start = time()
 while True:
     b = False
