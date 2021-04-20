@@ -71,13 +71,13 @@ class TrainingModel:
         print(model.predict(img_valid).shape)
 
     def run(self):
-        x_train = self.train['features']
+        x_train = self.train['features'] / 255
         y_train = self.train['labels']
 
-        x_test = self.test['features']
+        x_test = self.test['features'] / 255
         y_test = self.test['labels']
 
-        x_valid = self.valid['features']
+        x_valid = self.valid['features'] / 255
         y_valid = self.valid['labels']
 
         model = self.loadModel()
@@ -100,28 +100,30 @@ class ProductionModel(TrainingModel):
     def __init__(self):
         super(ProductionModel, self).__init__()
         self.model = self.loadModel(compile=False)
-        self.threshold = 0.95
-        self.draw = np.zeros((1, 2), dtype='uint8')
+        self.threshold = 0.98
+        self.draw = np.empty((0, 2), dtype='uint32')
         if not self.model:
             raise Exception("ModelNotLoaded")
 
     def show_image(self, image):
         cv.imshow("image", image)
-        cv.waitKey(100)
+        cv.waitKey(0)
         #cv.destroyAllWindows()
 
 
-    def checkResult(self, data):
-        result = data[data >= self.threshold]
-        print(result)
-        return result
+    def draw_matches(self, image, point, kernel):
+        image = cv.rectangle(image, point, (point[0]+kernel, point[1]+kernel), (255, 0, 0), 3)
+
+        return image
 
 
     def run(self):
 
-        image = cv.imread("/home/roger/Imágenes/signals/test.png", cv.IMREAD_COLOR)/255
+        original_image = cv.imread("/home/roger/Imágenes/signals/speed.png", cv.IMREAD_COLOR)
+        image = original_image/255
         shape = np.shape(image)
-        kernel = 32
+        print(shape)
+        kernel = 166
         x = 0
         y = 0
         while True:
@@ -129,20 +131,20 @@ class ProductionModel(TrainingModel):
                 while y+kernel <= shape[1]:
                     crop = image[x:x+kernel, y:y+kernel, :]
                     #self.show_image(crop*255)
-                    final = np.array([crop*255])
+                    final = np.array([np.resize(crop, (32,32,3))])
                     result = self.model.predict(final)
-                    if len(result[result >= self.threshold]) > 0:
-                        self.draw = np.concatenate((self.draw, np.array([[x,y]], dtype='uint8')))
-                    y += kernel // 2
+                    #classes = self.model.predict_classes(final)
+                    if np.amax(result) >= self.threshold:
+                        original_image = self.draw_matches(original_image, (x,y), kernel)
+                        #print(self.labels[classes[0]])
+                    y += kernel//2
 
-                x+= kernel // 2
+                x += kernel//2
                 y = 0
             else:
                 break
 
-        print(self.draw)
-        #print(np.shape(final_images))
-        final_image = []
-        y = y + kernel // 2
+
+        self.show_image(original_image)
 
         cv.destroyAllWindows()
