@@ -100,36 +100,26 @@ class ProductionModel(TrainingModel):
     def __init__(self):
         super(ProductionModel, self).__init__()
         self.model = self.loadModel(compile=False)
-        self.threshold = 0.5
-        self.biggest = 0
-        self.biggest_x = 0
-        self.biggest_y = 0
+        self.threshold = 0.95
+        self.draw = np.zeros((1, 2), dtype='uint8')
         if not self.model:
             raise Exception("ModelNotLoaded")
 
     def show_image(self, image):
         cv.imshow("image", image)
-        cv.waitKey(0)
-        cv.destroyAllWindows()
+        cv.waitKey(100)
+        #cv.destroyAllWindows()
 
 
     def checkResult(self, data):
-        result = 0
-        for element in data[0]:
-            if element > self.biggest:
-                self.biggest = element
-                result = 2
-
-            if element >= self.threshold:
-                print("EUREKA!")
-                result = 1
-
+        result = data[data >= self.threshold]
+        print(result)
         return result
 
 
     def run(self):
 
-        image = cv.imread("/home/roger/Imágenes/signals/carretera.png", cv.IMREAD_COLOR)/255
+        image = cv.imread("/home/roger/Imágenes/signals/test.png", cv.IMREAD_COLOR)/255
         shape = np.shape(image)
         kernel = 32
         x = 0
@@ -138,20 +128,19 @@ class ProductionModel(TrainingModel):
             if x+kernel <= shape[0]:
                 while y+kernel <= shape[1]:
                     crop = image[x:x+kernel, y:y+kernel, :]
-                    final = np.array([crop])
+                    #self.show_image(crop*255)
+                    final = np.array([crop*255])
                     result = self.model.predict(final)
-                    if self.checkResult(result) == 2:
-                        self.biggest_x = x
-                        self.biggest_y = y
+                    if len(result[result >= self.threshold]) > 0:
+                        self.draw = np.concatenate((self.draw, np.array([[x,y]], dtype='uint8')))
                     y += kernel // 2
 
                 x+= kernel // 2
+                y = 0
             else:
                 break
 
-        print(self.biggest)
-        print(self.biggest_x)
-        print(self.biggest_y)
+        print(self.draw)
         #print(np.shape(final_images))
         final_image = []
         y = y + kernel // 2
