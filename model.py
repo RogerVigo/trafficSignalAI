@@ -19,8 +19,8 @@ class TrainingModel:
         except:
             print("Saved model folder already exists")
 
-        self.batch_size = 300
-        self.epochs = 20
+        self.batch_size = 100
+        self.epochs = 10
 
         self.images_path = "./data/myData/"
 
@@ -85,15 +85,14 @@ class TrainingModel:
     def createModel(self):
         model = Sequential()
 
-        # model.add(Conv2D(32, (3, 3), activation="relu", input_shape=(32, 32,3)))
-        # model.add(MaxPooling2D(2, 2))
-        # model.add(Dropout(0.2))
+        model.add(Conv2D(32, (3, 3), activation="relu", input_shape=(32, 32,3)))
+        model.add(MaxPooling2D(2, 2))
+        model.add(Dropout(0.2))
 
-        # model.add(Conv2D(64, (3, 3), activation="relu"))
-        # model.add(MaxPooling2D(2, 2))
-        # model.add(Dropout(0.2))
+        model.add(Conv2D(32, (3, 3), activation="relu"))
+        model.add(MaxPooling2D(2, 2))
+        model.add(Dropout(0.2))
 
-        model.add(InputLayer(input_shape=(32, 32, 3)))
         model.add(Flatten())
         model.add(Dense(128, activation="relu"))
         model.add(Dense(128, activation="relu"))
@@ -118,14 +117,20 @@ class TrainingModel:
 
         print(np.amax(model.predict(img_valid) * 100))
 
+    def test(self):
+        original_image = cv.imread("/home/roger/Imágenes/signals/speed.png")
+        image = cv.resize(original_image, (32, 32)) / 255
+        print(np.shape(image))
+        self.model.predict(image)
+
     def run(self):
-        x_train = self.images["train"]
+        x_train = self.images["train"] / 255
         y_train = self.labels["train"]
 
-        x_test = self.images["test"]
+        x_test = self.images["test"] / 255
         y_test = self.labels["test"]
 
-        x_valid = self.images["valid"]
+        x_valid = self.images["valid"] / 255
         y_valid = self.labels["valid"]
 
         model = self.loadModel()
@@ -140,9 +145,10 @@ class TrainingModel:
 
             path = self.model_save_path + str(dt.now())
             if self.save:
-                model.save(path)
+                model.save(path + "/myModel.h5")
 
         self.evaluate(model, x_valid, y_valid)
+        self.model = model
 
 
 class ProductionModel():
@@ -162,7 +168,7 @@ class ProductionModel():
             return False
 
         print("Loading model!")
-        return tf.keras.models.load_model(self.model_save_path + files[len(files) - 1], compile=compile)
+        return tf.keras.models.load_model(self.model_save_path + files[len(files) - 1] + "/myModel.h5", compile=compile)
 
     def show_image(self, image):
         cv.imshow("image", image)
@@ -175,19 +181,13 @@ class ProductionModel():
         return image
 
     def runImage(self):
-        original_image = cv.imread("/home/roger/Imágenes/signals/speed.png", cv.IMREAD_COLOR)
+        original_image = cv.imread("/home/roger/Imágenes/signals/speed.png")
         image = cv.resize(original_image, (32,32))
-        #self.predict(original_image/255)
-        image = image / 255
-        print(image)
-        #
-        exit()
-        result = self.model.predict(original_image/255)
-        print(np.shape(result))
-        print(np.amax(result) * 100)
+        print(np.shape(image))
+        result = self.model.predict(np.reshape(image, (1,32,32,3)))
+        print(np.amax(result))
+        print(result * 100)
 
-        label = np.where(result == np.amax(result))
-        print(self.label_names["Name"][label[1][0]])
         cv.destroyAllWindows()
 
     def predict(self, image):
