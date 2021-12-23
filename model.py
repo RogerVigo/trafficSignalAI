@@ -6,9 +6,11 @@ import cv2 as cv
 from PIL import Image
 import pickle as pkl
 import tensorflow as tf
+from tensorflow import lite as tflite
 from tensorflow.keras.layers import Dense, InputLayer, Dropout, Conv2D, AveragePooling2D, MaxPooling2D, Flatten
 from tensorflow.keras.models import Sequential
 
+print("it works!")
 
 class TrainingModel:
     def __init__(self, save=False):
@@ -56,7 +58,7 @@ class TrainingModel:
 
             for x, img in enumerate(os.listdir(images_path)):
                 # print(str(x) + " OF " + str(dir_len))
-                loaded = cv.imread(images_path + img)
+                loaded = tf.Variable(cv.imread(images_path + img))
 
                 if x <= dir_len * 0.7:
                     images["train"].append(loaded)

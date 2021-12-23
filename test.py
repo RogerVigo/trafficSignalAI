@@ -1,6 +1,4 @@
-import cv2
 import pandas as pd
-import numpy as np
 from time import time, time_ns
 import os
 import cv2 as cv
